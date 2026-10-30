@@ -117,7 +117,7 @@ input:focus{border-color:#8d8bff;box-shadow:0 0 0 3px #8d8bff25}
 (() => {
   "use strict";
   const API_URL = "https://draw.ar-lottery01.com/WinGo/WinGo_1M/GetHistoryIssuePage.json?pageNo=1";
-  const ACCESS_KEY = "HACKIIVIP10";
+  const ACCESS_KEY = "HACKIIVIP09";
   const FIXED_SALT = "H-8-2-5-6";
   const $ = id => document.getElementById(id);
   let active = false;
@@ -127,6 +127,10 @@ input:focus{border-color:#8d8bff;box-shadow:0 0 0 3px #8d8bff25}
   let audioContext = null;
   let pollBusy = false;
   let lastWallMinute = "";
+  let internetEpochAtSync = 0;
+  let monotonicAtSync = 0;
+  let timeSyncBusy = false;
+  let timeSyncLabel = "Internet time not synced";
 
   function getList(payload) {
     const candidates = [payload?.data?.list, payload?.data?.records, payload?.data?.items,
@@ -272,7 +276,7 @@ input:focus{border-color:#8d8bff;box-shadow:0 0 0 3px #8d8bff25}
       // Use the API's first row as the newest result, as supplied by this feed.
       const latest = valid[0];
       $("source").textContent = "Live API · " + valid.length + " valid results";
-      $("updated").textContent = "Checked " + new Date().toLocaleTimeString();
+      $("updated").textContent = "API checked " + formatIndiaTime(getIndiaNowMs(), {hour:"2-digit",minute:"2-digit",second:"2-digit",hour12:true}) + " IST";
 
       if (pending) {
         const exact = valid.find(row => row.issue === pending.issue);
@@ -307,15 +311,96 @@ input:focus{border-color:#8d8bff;box-shadow:0 0 0 3px #8d8bff25}
       pollBusy = false;
     }
   }
+  function getIndiaNowMs() {
+    if (!internetEpochAtSync) return 0;
+    // Advance the last trusted internet timestamp using a monotonic browser clock,
+    // never the device's wall-clock date/time.
+    return internetEpochAtSync + (performance.now() - monotonicAtSync);
+  }
+
+  function formatIndiaTime(epochMs, options) {
+    return new Intl.DateTimeFormat("en-IN", {
+      timeZone: "Asia/Kolkata",
+      ...options
+    }).format(new Date(epochMs));
+  }
+
+  async function syncInternetTime() {
+    if (timeSyncBusy) return false;
+    timeSyncBusy = true;
+    const endpoints = [
+      "https://worldtimeapi.org/api/timezone/Asia/Kolkata",
+      "https://timeapi.io/api/Time/current/zone?timeZone=Asia/Kolkata"
+    ];
+    try {
+      let synced = false;
+      for (const endpoint of endpoints) {
+        const started = performance.now();
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 7000);
+        try {
+          const response = await fetch(endpoint + (endpoint.includes("?") ? "&" : "?") + "_=" + Math.floor(started), {
+            cache: "no-store",
+            headers: { "Accept": "application/json", "Cache-Control": "no-cache" },
+            signal: controller.signal
+          });
+          if (!response.ok) throw new Error("Time server HTTP " + response.status);
+          const data = await response.json();
+          const received = performance.now();
+          let serverEpochMs = 0;
+          if (Number.isFinite(data.unixtime)) {
+            serverEpochMs = data.unixtime * 1000;
+          } else if (data.datetime) {
+            serverEpochMs = Date.parse(data.datetime);
+          } else if (data.dateTime) {
+            serverEpochMs = Date.parse(data.dateTime);
+          }
+          if (!Number.isFinite(serverEpochMs) || serverEpochMs < 1) {
+            throw new Error("Unrecognized internet time response");
+          }
+          // Approximate the server timestamp at the midpoint of the network request.
+          internetEpochAtSync = serverEpochMs + ((received - started) / 2);
+          monotonicAtSync = received;
+          timeSyncLabel = "Internet time · IST";
+          synced = true;
+          break;
+        } catch (_) {
+          // Try the backup internet time provider.
+        } finally {
+          clearTimeout(timeout);
+        }
+      }
+      if (!synced) {
+        timeSyncLabel = "Internet time unavailable · retrying";
+        $("status").textContent = "Cannot reach an Indian internet time server · retrying";
+      }
+      return synced;
+    } finally {
+      timeSyncBusy = false;
+    }
+  }
+
   function updateClock() {
-    const now = new Date();
-    $("clock").textContent = now.toLocaleTimeString();
-    const remaining = 60 - now.getSeconds();
+    if (!internetEpochAtSync) {
+      $("clock").textContent = "SYNCING IST…";
+      $("timer").textContent = "--:--";
+      return;
+    }
+    const nowMs = getIndiaNowMs();
+    const now = new Date(nowMs);
+    $("clock").textContent = formatIndiaTime(nowMs, {
+      hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: true
+    }) + " IST";
+    const seconds = now.getUTCSeconds(); // epoch seconds align to the minute boundary
+    const remaining = 60 - seconds;
     $("timer").textContent = "00:" + String(remaining).padStart(2, "0");
-    const minuteKey = now.getFullYear() + "-" + now.getMonth() + "-" + now.getDate() + "-" + now.getHours() + "-" + now.getMinutes();
+    const minuteKey = formatIndiaTime(nowMs, {
+      year: "numeric", month: "2-digit", day: "2-digit",
+      hour: "2-digit", minute: "2-digit", hour12: false
+    });
     if (active && minuteKey !== lastWallMinute) {
       lastWallMinute = minuteKey;
-      pollApi(); // refresh exactly when the device wall clock enters a new minute
+      pollApi();
     }
   }
   $("start").addEventListener("click", async () => {
@@ -327,15 +412,29 @@ input:focus{border-color:#8d8bff;box-shadow:0 0 0 3px #8d8bff25}
       $("loginError").textContent = "This browser does not support Web Crypto.";
       return;
     }
+    $("start").disabled = true;
+    $("start").textContent = "SYNCING INTERNET TIME…";
+    const timeReady = await syncInternetTime();
+    if (!timeReady) {
+      $("start").disabled = false;
+      $("start").textContent = "START";
+      $("loginError").textContent = "Indian internet time is unavailable. Please try again.";
+      return;
+    }
     active = true;
     await ensureAudio();
     $("login").style.display = "none";
     $("app").style.display = "block";
+    $("status").textContent = "Internet time synchronized · India Standard Time";
     lastWallMinute = "";
     updateClock();
     pollApi();
     setInterval(updateClock, 250);
-    // Retry the API regularly; the wall-clock minute boundary also triggers a fresh sync.
+    // Re-sync against internet time every minute; data API is also retried frequently.
+    setInterval(async () => {
+      await syncInternetTime();
+      updateClock();
+    }, 60000);
     setInterval(pollApi, 3000);
     document.addEventListener("visibilitychange", () => {
       if (active && !document.hidden) pollApi();
