@@ -1,0 +1,265 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#080b14">
+<title>EARN WITH HACKII</title>
+<style>
+:root{color-scheme:dark;--bg:#080b14;--panel:#111827;--line:#263247;--muted:#8d9ab0;--cyan:#42e8d1;--white:#f5f7fb;--red:#ff647c}
+*{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(ellipse at 50% -20%,#183047 0%,#0b1220 42%,var(--bg) 78%);font-family:Inter,system-ui,Arial,sans-serif;color:var(--white);display:flex;align-items:center;justify-content:center;padding:22px}
+.wrap{width:100%;max-width:430px}.brand{text-align:center;margin-bottom:28px}.brand .mark{font-size:12px;letter-spacing:5px;color:var(--cyan);font-weight:800}.brand h1{font-size:29px;letter-spacing:1.5px;margin:10px 0 5px;font-weight:900}.brand p{margin:0;color:var(--muted);font-size:11px;letter-spacing:2.5px}
+.panel{background:linear-gradient(155deg,rgba(22,32,50,.97),rgba(12,18,30,.98));border:1px solid var(--line);border-radius:23px;padding:25px 21px;box-shadow:0 22px 65px #0008}
+.kicker{font-size:11px;color:var(--muted);letter-spacing:2px;font-weight:800;margin-bottom:18px}
+label{display:block;font-size:12px;color:#bdc8d8;margin-bottom:9px}
+input{width:100%;height:53px;border-radius:13px;border:1px solid #33435b;background:#080e19;color:white;padding:0 15px;font-size:16px;outline:none;letter-spacing:1px}
+input:focus{border-color:var(--cyan);box-shadow:0 0 0 3px #42e8d11c}
+button{width:100%;height:53px;border:0;border-radius:13px;margin-top:15px;background:linear-gradient(100deg,#22cdbb,#64f0d7);color:#041411;font-weight:900;font-size:15px;letter-spacing:1.4px;cursor:pointer}
+button:disabled{opacity:.55;cursor:wait}
+.telegram{display:block;text-align:center;margin-top:17px;color:var(--cyan);text-decoration:none;font-size:13px;font-weight:700}
+.error{color:var(--red);font-size:12px;text-align:center;min-height:18px;margin-top:10px}
+#app{display:none}.topline{display:flex;justify-content:space-between;align-items:center;margin-bottom:23px}
+.live{font-size:10px;letter-spacing:2px;color:var(--cyan);font-weight:900}.clock{font-variant-numeric:tabular-nums;color:#d6dfed;font-size:13px}
+.period-label{text-align:center;color:var(--muted);font-size:11px;letter-spacing:2px;font-weight:800}
+.period{text-align:center;font-size:19px;font-weight:800;letter-spacing:1px;margin:8px 0 24px;overflow-wrap:anywhere}
+.resultbox{border:1px solid #2b4153;background:linear-gradient(145deg,#0c1b29,#101a29);border-radius:19px;padding:22px 15px;text-align:center}
+.result-label{font-size:11px;letter-spacing:2.5px;color:var(--muted);font-weight:800}
+.number{font-size:94px;line-height:1.12;font-weight:950;letter-spacing:-5px;margin:9px 0 4px;color:var(--cyan);text-shadow:0 0 32px #42e8d13b}
+.size{font-size:20px;letter-spacing:4px;font-weight:900}
+.meta{display:flex;justify-content:space-between;gap:12px;margin-top:19px;color:var(--muted);font-size:11px}
+.meta span:last-child{text-align:right}
+.countdown{text-align:center;margin-top:23px}.countdown strong{display:block;font-size:27px;font-variant-numeric:tabular-nums;margin-top:5px}
+.status{text-align:center;color:var(--muted);font-size:11px;line-height:1.5;margin-top:17px;min-height:18px}
+.footer{text-align:center;color:#66758d;font-size:10px;letter-spacing:1px;margin-top:18px}
+.sound-row{display:flex;align-items:center;justify-content:space-between;margin-top:17px;padding-top:14px;border-top:1px solid #263247}
+.sound-toggle{display:flex;align-items:center;gap:8px;margin:0;color:#cbd5e1;font-size:12px;cursor:pointer}
+.sound-toggle input{width:16px;height:16px;accent-color:var(--cyan)}
+.sound-note{font-size:10px;color:var(--muted)}
+.alert-overlay{position:fixed;inset:0;z-index:20;display:none;align-items:center;justify-content:center;padding:22px;background:#02050bd9;backdrop-filter:blur(8px)}
+.alert-card{width:100%;max-width:320px;text-align:center;padding:30px 22px;border-radius:22px;background:#111c2b;border:1px solid #33445a;box-shadow:0 20px 80px #000a;animation:pop .22s ease-out}
+.alert-card.win{border-color:#28d8a5}.alert-card.loss{border-color:#ff647c}
+.alert-title{font-size:35px;font-weight:950;letter-spacing:3px;margin:4px 0 8px}
+.alert-card.win .alert-title{color:#42e8b5}.alert-card.loss .alert-title{color:#ff647c}
+.alert-detail{font-size:13px;color:#c5d0df;line-height:1.6}
+.alert-timer{font-size:10px;color:#8493a9;margin-top:17px;letter-spacing:1px}
+@keyframes pop{from{transform:scale(.88);opacity:.2}to{transform:scale(1);opacity:1}}
+.hidden{display:none!important}
+</style>
+</head>
+<body>
+<main class="wrap">
+  <header class="brand">
+    <div class="mark">◆ HACKII NETWORK ◆</div>
+    <h1>EARN WITH HACKII</h1>
+    <p>SMART ANALYSIS SYSTEM</p>
+  </header>
+
+  <section class="panel" id="login">
+    <div class="kicker">MEMBER ACCESS</div>
+    <label for="key">ENTER START KEY</label>
+    <input id="key" type="password" placeholder="Enter your access key" autocomplete="off">
+    <button id="start">START</button>
+    <a class="telegram" href="https://t.me/+8Lms2P9p3BozY2M1" target="_blank" rel="noopener">JOIN TELEGRAM CHANNEL ↗</a>
+    <div class="error" id="loginError"></div>
+  </section>
+
+  <section class="panel" id="app">
+    <div class="topline"><span class="live">● LIVE ANALYSIS</span><span class="clock" id="clock">--:--:--</span></div>
+    <div class="period-label">UPCOMING PERIOD</div>
+    <div class="period" id="period">WAITING…</div>
+    <div class="resultbox">
+      <div class="result-label">NEXT ESTIMATE</div>
+      <div class="number" id="number">—</div>
+      <div class="size" id="size">---</div>
+    </div>
+    <div class="meta"><span id="source">Waiting for API data</span><span id="updated">Not updated</span></div>
+    <div class="countdown"><div class="result-label">NEXT UPDATE IN</div><strong id="timer">00:00</strong></div>
+    <div class="status" id="status">Connecting to result source…</div>
+    <div class="sound-row">
+      <label class="sound-toggle"><input type="checkbox" id="soundOn" checked> Sound ON</label>
+      <span class="sound-note">WIN / LOSS alerts</span>
+    </div>
+    <div class="footer">SHA-256 · WEB CRYPTO · WALL CLOCK</div>
+  </section>
+</main>
+
+<div class="alert-overlay" id="alertOverlay" role="alert" aria-live="assertive">
+  <div class="alert-card" id="alertCard">
+    <div class="alert-title" id="alertTitle">WIN!</div>
+    <div class="alert-detail" id="alertDetail">Result verified</div>
+    <div class="alert-timer" id="alertTimer">CLOSING IN 5 SECONDS</div>
+  </div>
+</div>
+<script>
+(() => {
+  "use strict";
+  const API_URL = "https://draw.ar-lottery01.com/WinGo/WinGo_1M/GetHistoryIssuePage.json?pageNo=1";
+  const ACCESS_KEY = "HACKIIVIP09";
+  const FIXED_SALT = "H-8-2-5-6";
+  const $ = id => document.getElementById(id);
+  let active = false;
+  let pending = null;
+  let lastSettledIssue = "";
+  let lastAlertAt = 0;
+  let audioContext = null;
+  let pollBusy = false;
+
+  function getList(payload) {
+    const candidates = [payload?.data?.list, payload?.data?.records, payload?.data?.items,
+      payload?.list, payload?.records, payload?.items];
+    for (const value of candidates) if (Array.isArray(value)) return value;
+    return [];
+  }
+  function getIssue(row) {
+    return row?.issueNumber ?? row?.issue ?? row?.period ?? row?.issue_no ?? row?.drawId ?? null;
+  }
+  function getNumber(row) {
+    const raw = row?.number ?? row?.result ?? row?.openNumber ?? row?.winNumber ?? row?.value;
+    if (raw === undefined || raw === null) return null;
+    const match = String(raw).match(/\d+/);
+    return match ? Number(match[0]) % 10 : null;
+  }
+  function sizeOf(n) { return n <= 4 ? "SMALL" : "BIG"; }
+  function incrementIssue(issue) {
+    const s = String(issue ?? "");
+    const m = s.match(/^(.*?)(\d+)$/);
+    if (!m) return "—";
+    return m[1] + String(BigInt(m[2]) + 1n).padStart(m[2].length, "0");
+  }
+  async function sha256(text) {
+    const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(text));
+    return Array.from(new Uint8Array(digest), b => b.toString(16).padStart(2, "0")).join("");
+  }
+  async function ensureAudio() {
+    try {
+      const Ctx = window.AudioContext || window.webkitAudioContext;
+      if (!Ctx) return null;
+      if (!audioContext) audioContext = new Ctx();
+      if (audioContext.state === "suspended") await audioContext.resume();
+      return audioContext;
+    } catch (_) { return null; }
+  }
+  async function playTone(kind) {
+    if (!$("soundOn").checked) return;
+    const ctx = await ensureAudio();
+    if (!ctx) return;
+    const notes = kind === "win" ? [660, 880, 1100] : [260, 190];
+    let at = ctx.currentTime;
+    notes.forEach((freq, i) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = kind === "win" ? "sine" : "triangle";
+      osc.frequency.setValueAtTime(freq, at);
+      gain.gain.setValueAtTime(0.0001, at);
+      gain.gain.exponentialRampToValueAtTime(0.12, at + 0.025);
+      gain.gain.exponentialRampToValueAtTime(0.0001, at + 0.19);
+      osc.connect(gain); gain.connect(ctx.destination);
+      osc.start(at); osc.stop(at + 0.21);
+      at += 0.23;
+    });
+  }
+  function showAlert(kind, predicted, actual, issue) {
+    const overlay = $("alertOverlay");
+    const card = $("alertCard");
+    card.className = "alert-card " + kind;
+    $("alertTitle").textContent = kind === "win" ? "WIN!" : "LOSS!";
+    $("alertDetail").textContent =
+      "Period " + issue + " · Predicted " + predicted + " · Actual " + actual;
+    overlay.style.display = "flex";
+    $("alertTimer").textContent = "CLOSING IN 5 SECONDS";
+    const shownAt = Date.now();
+    lastAlertAt = shownAt;
+    playTone(kind);
+    setTimeout(() => {
+      if (lastAlertAt === shownAt) overlay.style.display = "none";
+    }, 5000);
+  }
+  async function makePrediction(valid) {
+    const latest = valid[0];
+    const upcoming = incrementIssue(latest.issue);
+    const fingerprint = valid.slice(0, 10).map(x => x.issue + ":" + x.number).join("|");
+    const digest = await sha256(FIXED_SALT + "|" + upcoming + "|" + fingerprint);
+    const digit = parseInt(digest.slice(0, 8), 16) % 10;
+    pending = { issue: upcoming, digit, size: sizeOf(digit) };
+    $("period").textContent = upcoming;
+    $("number").textContent = digit;
+    $("size").textContent = pending.size;
+    $("source").textContent = "10-result scan · " + valid.length + " valid";
+    $("updated").textContent = "Updated " + new Date().toLocaleTimeString();
+    $("status").textContent = "Waiting for API result to verify this estimate";
+  }
+  async function pollApi() {
+    if (!active || pollBusy) return;
+    pollBusy = true;
+    try {
+      const response = await fetch(API_URL, {
+        method: "GET", cache: "no-store", headers: { "Accept": "application/json" }
+      });
+      if (!response.ok) throw new Error("API HTTP " + response.status);
+      const payload = await response.json();
+      const rows = getList(payload).slice(0, 10);
+      const valid = rows.map(r => ({
+        issue: String(getIssue(r) ?? ""),
+        number: getNumber(r)
+      })).filter(r => r.issue && Number.isInteger(r.number));
+
+      if (!valid.length) throw new Error("API response format not recognized");
+
+      // First settle an outstanding prediction only when the API publishes that exact period.
+      if (pending && valid[0].issue === pending.issue && lastSettledIssue !== pending.issue) {
+        const actualNumber = valid[0].number;
+        const actualSize = sizeOf(actualNumber);
+        const resultKind = actualSize === pending.size ? "win" : "loss";
+        lastSettledIssue = pending.issue;
+        showAlert(resultKind, pending.size + " (" + pending.digit + ")",
+          actualSize + " (" + actualNumber + ")", pending.issue);
+        $("status").textContent = "Result verified · " + resultKind.toUpperCase();
+        pending = null;
+      }
+
+      // Build the next estimate from the newest API data after settlement.
+      if (!pending && valid[0].issue !== lastSettledIssue) {
+        await makePrediction(valid);
+      } else if (!pending && !lastSettledIssue) {
+        await makePrediction(valid);
+      } else if (pending && valid[0].issue !== pending.issue) {
+        // Keep waiting for the predicted period; don't compare an older result.
+        $("status").textContent = "Waiting for period " + pending.issue + " to appear in API";
+      }
+    } catch (err) {
+      $("status").textContent = "API unavailable: " + (err?.message || "connection error");
+      $("source").textContent = "Waiting for valid results";
+    } finally {
+      pollBusy = false;
+    }
+  }
+  function updateClock() {
+    const now = new Date();
+    $("clock").textContent = now.toLocaleTimeString();
+    const remaining = 60 - now.getSeconds();
+    $("timer").textContent = "00:" + String(remaining).padStart(2, "0");
+  }
+  $("start").addEventListener("click", async () => {
+    if ($("key").value.trim() !== ACCESS_KEY) {
+      $("loginError").textContent = "Invalid key. Please try again.";
+      return;
+    }
+    if (!window.crypto?.subtle || !window.crypto?.getRandomValues) {
+      $("loginError").textContent = "This browser does not support Web Crypto.";
+      return;
+    }
+    active = true;
+    await ensureAudio();
+    $("login").style.display = "none";
+    $("app").style.display = "block";
+    updateClock();
+    pollApi();
+    setInterval(updateClock, 250);
+    // Frequent lightweight polling helps detect the newly published round quickly.
+    setInterval(pollApi, 5000);
+  });
+  $("key").addEventListener("keydown", e => { if (e.key === "Enter") $("start").click(); });
+})();
+</script>
+</body>
+</html>
