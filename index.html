@@ -126,6 +126,7 @@ input:focus{border-color:#8d8bff;box-shadow:0 0 0 3px #8d8bff25}
   let lastAlertAt = 0;
   let audioContext = null;
   let pollBusy = false;
+  let pollTimer = null;
   let lastWallMinute = "";
   let internetEpochAtSync = 0;
   let monotonicAtSync = 0;
@@ -219,7 +220,7 @@ input:focus{border-color:#8d8bff;box-shadow:0 0 0 3px #8d8bff25}
     const entropy = new Uint32Array(4);
     crypto.getRandomValues(entropy);
     const seedText = FIXED_SALT + "|" + upcoming + "|" + fingerprint + "|" +
-      Array.from(entropy).join(":") + "|" + Date.now();
+      Array.from(entropy).join(":") + "|" + Math.floor(getIndiaNowMs());
     const digest = new Uint8Array(await crypto.subtle.digest(
       "SHA-256", new TextEncoder().encode(seedText)
     ));
@@ -251,6 +252,15 @@ input:focus{border-color:#8d8bff;box-shadow:0 0 0 3px #8d8bff25}
     } catch (_) { return 0; }
   }
 
+  function scheduleNextPoll(delay = 2500) {
+    if (!active) return;
+    if (pollTimer) clearTimeout(pollTimer);
+    pollTimer = setTimeout(() => {
+      pollTimer = null;
+      pollApi();
+    }, delay);
+  }
+
   async function pollApi() {
     if (!active || pollBusy) return;
     pollBusy = true;
@@ -273,7 +283,8 @@ input:focus{border-color:#8d8bff;box-shadow:0 0 0 3px #8d8bff25}
       })).filter(r => r.issue && Number.isInteger(r.number));
 
       if (!valid.length) throw new Error("API data format not recognized");
-      // Use the API's first row as the newest result, as supplied by this feed.
+      // Never assume the API's array order: explicitly select the highest issue.
+      valid.sort((a, b) => compareIssue(b.issue, a.issue));
       const latest = valid[0];
       $("source").textContent = "Live API · " + valid.length + " valid results";
       $("updated").textContent = "API checked " + formatIndiaTime(getIndiaNowMs(), {hour:"2-digit",minute:"2-digit",second:"2-digit",hour12:true}) + " IST";
@@ -309,6 +320,7 @@ input:focus{border-color:#8d8bff;box-shadow:0 0 0 3px #8d8bff25}
     } finally {
       clearTimeout(timeout);
       pollBusy = false;
+      scheduleNextPoll(2500);
     }
   }
   function getIndiaNowMs() {
@@ -430,16 +442,31 @@ input:focus{border-color:#8d8bff;box-shadow:0 0 0 3px #8d8bff25}
     updateClock();
     pollApi();
     setInterval(updateClock, 250);
-    // Re-sync against internet time every minute; data API is also retried frequently.
+    // Re-sync trusted India internet time every minute.
     setInterval(async () => {
       await syncInternetTime();
       updateClock();
     }, 60000);
-    setInterval(pollApi, 3000);
-    document.addEventListener("visibilitychange", () => {
-      if (active && !document.hidden) pollApi();
+    document.addEventListener("visibilitychange", async () => {
+      if (active && !document.hidden) {
+        await syncInternetTime();
+        updateClock();
+        pollApi();
+      }
     });
-    window.addEventListener("online", () => { if (active) pollApi(); });
+    window.addEventListener("pageshow", () => {
+      if (active) pollApi();
+    });
+    window.addEventListener("focus", () => {
+      if (active) pollApi();
+    });
+    window.addEventListener("online", async () => {
+      if (active) {
+        await syncInternetTime();
+        updateClock();
+        pollApi();
+      }
+    });
   });
   $("key").addEventListener("keydown", e => { if (e.key === "Enter") $("start").click(); });
 })();
