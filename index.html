@@ -25,7 +25,6 @@ button:disabled{opacity:.55;cursor:wait}
 .resultbox{border:1px solid #2b4153;background:linear-gradient(145deg,#0c1b29,#101a29);border-radius:19px;padding:22px 15px;text-align:center}
 .result-label{font-size:11px;letter-spacing:2.5px;color:var(--muted);font-weight:800}
 .number{font-size:94px;line-height:1.12;font-weight:950;letter-spacing:-5px;margin:9px 0 4px;color:var(--cyan);text-shadow:0 0 32px #42e8d13b;transition:color .2s,text-shadow .2s}.number.red{color:#ff5368;text-shadow:0 0 30px #ff536866}.number.green{color:#27e58a;text-shadow:0 0 30px #27e58a66}.size.red{color:#ff7888}.size.green{color:#55f0a4}
-.visual-pair{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:17px}.visual-card{position:relative;min-height:112px;overflow:hidden;border-radius:16px;padding:13px 12px;border:1px solid #ffffff20;display:flex;flex-direction:column;justify-content:space-between;isolation:isolate;transition:transform .2s,border-color .2s,box-shadow .2s}.visual-card:before{content:"";position:absolute;inset:0;z-index:-1;opacity:.95}.visual-card:after{content:"";position:absolute;width:100px;height:100px;border:1px solid #ffffff30;border-radius:50%;right:-26px;top:12px;box-shadow:0 0 0 12px #ffffff08,0 0 0 25px #ffffff06;z-index:-1}.visual-card.big:before{background:radial-gradient(circle at 80% 20%,#ffdc6a88,transparent 40%),linear-gradient(135deg,#562d0c,#e87919 58%,#ffb52e)}.visual-card.small:before{background:radial-gradient(circle at 80% 20%,#78eaff88,transparent 40%),linear-gradient(135deg,#102f70,#176bd0 58%,#31c5e9)}.visual-card.active{border-color:#fff;box-shadow:0 0 0 2px #ffffff20,0 8px 25px #0007;transform:translateY(-2px)}.visual-tag{font-size:10px;letter-spacing:2px;font-weight:900;color:#fff}.visual-word{font-size:28px;line-height:1;font-weight:1000;letter-spacing:1px;color:#fff;text-shadow:0 3px 14px #0007}.visual-sub{font-size:9px;letter-spacing:1px;color:#fffD;font-weight:800}
 .size{font-size:20px;letter-spacing:4px;font-weight:900}
 .meta{display:flex;justify-content:space-between;gap:12px;margin-top:19px;color:var(--muted);font-size:11px}
 .meta span:last-child{text-align:right}
@@ -45,6 +44,29 @@ button:disabled{opacity:.55;cursor:wait}
 .alert-timer{font-size:10px;color:#8493a9;margin-top:17px;letter-spacing:1px}
 @keyframes pop{from{transform:scale(.88);opacity:.2}to{transform:scale(1);opacity:1}}
 .hidden{display:none!important}
+
+/* Lightweight animated premium skin */
+body{background:radial-gradient(ellipse at 12% 8%,#39216b66,transparent 36%),radial-gradient(ellipse at 92% 86%,#075b7166,transparent 34%),linear-gradient(145deg,#080b18,#11142a 55%,#080b18);background-size:140% 140%;animation:bgDrift 18s ease-in-out infinite alternate}
+@keyframes bgDrift{from{background-position:0% 0%,100% 100%,0% 0%}to{background-position:30% 15%,75% 80%,100% 100%}}
+.brand .mark{color:#8c83ff;text-shadow:0 0 18px #8c83ff66}
+.brand h1{background:linear-gradient(90deg,#fff,#9ceeff,#c4a5ff,#fff);background-size:220% auto;color:transparent;background-clip:text;-webkit-background-clip:text;animation:shine 7s linear infinite}
+@keyframes shine{to{background-position:220% center}}
+.panel{position:relative;overflow:hidden;background:linear-gradient(145deg,#171b34f5,#10182af5);border-color:#6570ad66;box-shadow:0 24px 70px #0009,0 0 28px #6558d522;animation:panelIn .55s cubic-bezier(.2,.8,.2,1) both}
+.panel:before{content:"";position:absolute;inset:0 0 auto;height:2px;background:linear-gradient(90deg,transparent,#54e7ff,#a78bfa,#ff78b7,transparent);opacity:.9}
+@keyframes panelIn{from{opacity:0;transform:translateY(12px) scale(.99)}to{opacity:1;transform:none}}
+button{background:linear-gradient(100deg,#43d9d2,#7d8cff 55%,#c18cff);color:#07101d;box-shadow:0 8px 24px #6e7dff33;transition:transform .18s,filter .18s}
+button:active{transform:scale(.985);filter:brightness(1.1)}
+input{background:#090e20;border-color:#48527b}
+input:focus{border-color:#8d8bff;box-shadow:0 0 0 3px #8d8bff25}
+.resultbox{background:radial-gradient(circle at 50% 0%,#3e4a8a55,transparent 58%),linear-gradient(145deg,#111b36,#101326);border-color:#6979c477;box-shadow:inset 0 1px #ffffff0b,0 12px 28px #0003}
+.number{animation:numberIn .35s ease-out}
+@keyframes numberIn{from{opacity:.3;transform:translateY(7px) scale(.94)}to{opacity:1;transform:none}}
+.number.red{color:#ff5d78;text-shadow:0 0 28px #ff536866}
+.number.green{color:#38e69b;text-shadow:0 0 28px #27e58a66}
+.live{color:#57edc5}.countdown strong{color:#d5d6ff;text-shadow:0 0 18px #8b83ff44}
+.status{transition:color .2s}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important}}
+
 </style>
 </head>
 <body>
@@ -73,10 +95,6 @@ button:disabled{opacity:.55;cursor:wait}
       <div class="number" id="number">—</div>
       <div class="size" id="size">---</div>
     </div>
-    <div class="visual-pair" aria-label="Big and small visual indicators">
-      <div class="visual-card big" id="bigCard"><span class="visual-tag">HIGH RANGE</span><span class="visual-word">BIG</span><span class="visual-sub">5 · 6 · 7 · 8 · 9</span></div>
-      <div class="visual-card small" id="smallCard"><span class="visual-tag">LOW RANGE</span><span class="visual-word">SMALL</span><span class="visual-sub">0 · 1 · 2 · 3 · 4</span></div>
-    </div>
     <div class="meta"><span id="source">Waiting for API data</span><span id="updated">Not updated</span></div>
     <div class="countdown"><div class="result-label">NEXT UPDATE IN</div><strong id="timer">00:00</strong></div>
     <div class="status" id="status">Connecting to result source…</div>
@@ -84,7 +102,7 @@ button:disabled{opacity:.55;cursor:wait}
       <label class="sound-toggle"><input type="checkbox" id="soundOn" checked> Sound ON</label>
       <span class="sound-note">WIN / LOSS alerts</span>
     </div>
-    <div class="footer">SHA-256 · WEB CRYPTO · WALL CLOCK</div>
+    <div class="footer">HACKII · LIVE WALL-CLOCK SYNC</div>
   </section>
 </main>
 
@@ -112,7 +130,8 @@ button:disabled{opacity:.55;cursor:wait}
 
   function getList(payload) {
     const candidates = [payload?.data?.list, payload?.data?.records, payload?.data?.items,
-      payload?.list, payload?.records, payload?.items];
+      payload?.result?.list, payload?.result?.records, payload?.list, payload?.records,
+      payload?.items, Array.isArray(payload?.data) ? payload.data : null];
     for (const value of candidates) if (Array.isArray(value)) return value;
     return [];
   }
@@ -131,8 +150,6 @@ button:disabled{opacity:.55;cursor:wait}
   function paintEstimate(digit) {
     $("number").className = "number " + colorOf(digit);
     $("size").className = "size " + colorOf(digit);
-    $("bigCard").classList.toggle("active", digit >= 5);
-    $("smallCard").classList.toggle("active", digit <= 4);
   }
   function incrementIssue(issue) {
     const s = String(issue ?? "");
@@ -192,68 +209,101 @@ button:disabled{opacity:.55;cursor:wait}
     const latest = valid[0];
     const upcoming = incrementIssue(latest.issue);
     const fingerprint = valid.slice(0, 10).map(x => x.issue + ":" + x.number).join("|");
-    const digest = await sha256(FIXED_SALT + "|" + upcoming + "|" + fingerprint);
-    const digit = parseInt(digest.slice(0, 8), 16) % 10;
+
+    // Mix API context with fresh browser cryptographic entropy, hash it, then
+    // use a tiny xorshift PRNG to map the mixed seed to a display estimate.
+    const entropy = new Uint32Array(4);
+    crypto.getRandomValues(entropy);
+    const seedText = FIXED_SALT + "|" + upcoming + "|" + fingerprint + "|" +
+      Array.from(entropy).join(":") + "|" + Date.now();
+    const digest = new Uint8Array(await crypto.subtle.digest(
+      "SHA-256", new TextEncoder().encode(seedText)
+    ));
+    let state = ((digest[0] << 24) | (digest[1] << 16) | (digest[2] << 8) | digest[3]) >>> 0;
+    if (state === 0) state = 0x6d2b79f5;
+    state ^= entropy[0];
+    state ^= state << 13; state >>>= 0;
+    state ^= state >>> 17;
+    state ^= state << 5; state >>>= 0;
+    const digit = state % 10;
+
     pending = { issue: upcoming, digit, size: sizeOf(digit) };
     $("period").textContent = upcoming;
     $("number").textContent = digit;
     $("size").textContent = pending.size;
     paintEstimate(digit);
-    $("source").textContent = "10-result scan · " + valid.length + " valid";
+    $("source").textContent = "Live API · " + valid.length + " valid results";
     $("updated").textContent = "Updated " + new Date().toLocaleTimeString();
-    $("status").textContent = "Waiting for API result to verify this estimate";
+    $("status").textContent = "Estimate ready · waiting for the matching API result";
   }
+
+  function compareIssue(a, b) {
+    const aa = String(a).match(/^(.*?)(\d+)$/);
+    const bb = String(b).match(/^(.*?)(\d+)$/);
+    if (!aa || !bb || aa[1] !== bb[1]) return 0;
+    try {
+      const x = BigInt(aa[2]), y = BigInt(bb[2]);
+      return x === y ? 0 : (x > y ? 1 : -1);
+    } catch (_) { return 0; }
+  }
+
   async function pollApi() {
     if (!active || pollBusy) return;
     pollBusy = true;
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 10000);
     try {
-      const response = await fetch(API_URL, {
-        method: "GET", cache: "no-store", headers: { "Accept": "application/json" }
+      const separator = API_URL.includes("?") ? "&" : "?";
+      const response = await fetch(API_URL + separator + "_ts=" + Date.now(), {
+        method: "GET",
+        cache: "no-store",
+        headers: { "Accept": "application/json", "Cache-Control": "no-cache" },
+        signal: controller.signal
       });
       if (!response.ok) throw new Error("API HTTP " + response.status);
       const payload = await response.json();
-      const rows = getList(payload).slice(0, 10);
+      const rows = getList(payload);
       const valid = rows.map(r => ({
         issue: String(getIssue(r) ?? ""),
         number: getNumber(r)
       })).filter(r => r.issue && Number.isInteger(r.number));
 
-      if (!valid.length) throw new Error("API response format not recognized");
+      if (!valid.length) throw new Error("API data format not recognized");
+      // Use the API's first row as the newest result, as supplied by this feed.
+      const latest = valid[0];
+      $("source").textContent = "Live API · " + valid.length + " valid results";
+      $("updated").textContent = "Checked " + new Date().toLocaleTimeString();
 
-      // First settle an outstanding prediction only when the API publishes that exact period.
-      const settledRow = pending ? valid.find(row => row.issue === pending.issue) : null;
-      if (pending && settledRow && lastSettledIssue !== pending.issue) {
-        const actualNumber = settledRow.number;
-        const actualSize = sizeOf(actualNumber);
-        const resultKind = actualSize === pending.size ? "win" : "loss";
-        lastSettledIssue = pending.issue;
-        showAlert(resultKind, pending.size + " (" + pending.digit + ")",
-          actualSize + " (" + actualNumber + ")", pending.issue);
-        $("status").textContent = "Result verified · " + resultKind.toUpperCase();
-        pending = null;
-      } else if (pending && valid[0].issue !== pending.issue && valid.some(row => row.issue === valid[0].issue)) {
-        const newest = valid[0].issue;
-        const pendingSuffix = String(pending.issue).match(/(\\d+)$/)?.[1];
-        const newestSuffix = String(newest).match(/(\\d+)$/)?.[1];
-        if (pendingSuffix && newestSuffix && BigInt(newestSuffix) > BigInt(pendingSuffix)) {
-          $("status").textContent = "Period " + pending.issue + " was skipped by the API feed · syncing latest period";
+      if (pending) {
+        const exact = valid.find(row => row.issue === pending.issue);
+        if (exact && lastSettledIssue !== pending.issue) {
+          const actualSize = sizeOf(exact.number);
+          const resultKind = actualSize === pending.size ? "win" : "loss";
+          lastSettledIssue = pending.issue;
+          showAlert(resultKind, pending.size + " (" + pending.digit + ")",
+            actualSize + " (" + exact.number + ")", pending.issue);
+          $("status").textContent = "API result verified · " + resultKind.toUpperCase();
+          pending = null;
+        } else if (compareIssue(latest.issue, pending.issue) > 0) {
+          $("status").textContent = "API moved past " + pending.issue + " · syncing latest round";
           pending = null;
         }
       }
 
-      // Build the next estimate from the newest API data after settlement.
-      if (!pending && valid[0].issue !== lastSettledIssue) {
+      // Generate only once per latest API issue. Repeated polls do not change it.
+      if (!pending && latest.issue !== lastSettledIssue) {
         await makePrediction(valid);
-      } else if (!pending && !lastSettledIssue) {
-        await makePrediction(valid);
-      } else if (pending && valid[0].issue !== pending.issue) {
-        // Keep waiting for the predicted period; don't compare an older result.
-        $("status").textContent = "Waiting for period " + pending.issue + " to appear in API";
+      } else if (pending) {
+        $("status").textContent = "Waiting for API result · target " + pending.issue;
+      } else if (latest.issue === lastSettledIssue) {
+        $("status").textContent = "Latest result synced · waiting for next API issue";
       }
     } catch (err) {
-      $("status").textContent = "API unavailable: " + (err?.message || "connection error");
-      $("source").textContent = "Waiting for valid results";
+      const message = err?.name === "AbortError" ? "request timed out" : (err?.message || "connection error");
+      $("status").textContent = "API refresh failed · " + message + " · retrying";
+      $("source").textContent = "API reconnecting";
     } finally {
+      clearTimeout(timeout);
       pollBusy = false;
     }
   }
@@ -286,7 +336,11 @@ button:disabled{opacity:.55;cursor:wait}
     pollApi();
     setInterval(updateClock, 250);
     // Retry the API regularly; the wall-clock minute boundary also triggers a fresh sync.
-    setInterval(pollApi, 5000);
+    setInterval(pollApi, 3000);
+    document.addEventListener("visibilitychange", () => {
+      if (active && !document.hidden) pollApi();
+    });
+    window.addEventListener("online", () => { if (active) pollApi(); });
   });
   $("key").addEventListener("keydown", e => { if (e.key === "Enter") $("start").click(); });
 })();
