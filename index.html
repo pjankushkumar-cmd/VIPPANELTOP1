@@ -24,7 +24,8 @@ button:disabled{opacity:.55;cursor:wait}
 .period{text-align:center;font-size:19px;font-weight:800;letter-spacing:1px;margin:8px 0 24px;overflow-wrap:anywhere}
 .resultbox{border:1px solid #2b4153;background:linear-gradient(145deg,#0c1b29,#101a29);border-radius:19px;padding:22px 15px;text-align:center}
 .result-label{font-size:11px;letter-spacing:2.5px;color:var(--muted);font-weight:800}
-.number{font-size:94px;line-height:1.12;font-weight:950;letter-spacing:-5px;margin:9px 0 4px;color:var(--cyan);text-shadow:0 0 32px #42e8d13b}
+.number{font-size:94px;line-height:1.12;font-weight:950;letter-spacing:-5px;margin:9px 0 4px;color:var(--cyan);text-shadow:0 0 32px #42e8d13b;transition:color .2s,text-shadow .2s}.number.red{color:#ff5368;text-shadow:0 0 30px #ff536866}.number.green{color:#27e58a;text-shadow:0 0 30px #27e58a66}.size.red{color:#ff7888}.size.green{color:#55f0a4}
+.visual-pair{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:17px}.visual-card{position:relative;min-height:112px;overflow:hidden;border-radius:16px;padding:13px 12px;border:1px solid #ffffff20;display:flex;flex-direction:column;justify-content:space-between;isolation:isolate;transition:transform .2s,border-color .2s,box-shadow .2s}.visual-card:before{content:"";position:absolute;inset:0;z-index:-1;opacity:.95}.visual-card:after{content:"";position:absolute;width:100px;height:100px;border:1px solid #ffffff30;border-radius:50%;right:-26px;top:12px;box-shadow:0 0 0 12px #ffffff08,0 0 0 25px #ffffff06;z-index:-1}.visual-card.big:before{background:radial-gradient(circle at 80% 20%,#ffdc6a88,transparent 40%),linear-gradient(135deg,#562d0c,#e87919 58%,#ffb52e)}.visual-card.small:before{background:radial-gradient(circle at 80% 20%,#78eaff88,transparent 40%),linear-gradient(135deg,#102f70,#176bd0 58%,#31c5e9)}.visual-card.active{border-color:#fff;box-shadow:0 0 0 2px #ffffff20,0 8px 25px #0007;transform:translateY(-2px)}.visual-tag{font-size:10px;letter-spacing:2px;font-weight:900;color:#fff}.visual-word{font-size:28px;line-height:1;font-weight:1000;letter-spacing:1px;color:#fff;text-shadow:0 3px 14px #0007}.visual-sub{font-size:9px;letter-spacing:1px;color:#fffD;font-weight:800}
 .size{font-size:20px;letter-spacing:4px;font-weight:900}
 .meta{display:flex;justify-content:space-between;gap:12px;margin-top:19px;color:var(--muted);font-size:11px}
 .meta span:last-child{text-align:right}
@@ -72,6 +73,10 @@ button:disabled{opacity:.55;cursor:wait}
       <div class="number" id="number">—</div>
       <div class="size" id="size">---</div>
     </div>
+    <div class="visual-pair" aria-label="Big and small visual indicators">
+      <div class="visual-card big" id="bigCard"><span class="visual-tag">HIGH RANGE</span><span class="visual-word">BIG</span><span class="visual-sub">5 · 6 · 7 · 8 · 9</span></div>
+      <div class="visual-card small" id="smallCard"><span class="visual-tag">LOW RANGE</span><span class="visual-word">SMALL</span><span class="visual-sub">0 · 1 · 2 · 3 · 4</span></div>
+    </div>
     <div class="meta"><span id="source">Waiting for API data</span><span id="updated">Not updated</span></div>
     <div class="countdown"><div class="result-label">NEXT UPDATE IN</div><strong id="timer">00:00</strong></div>
     <div class="status" id="status">Connecting to result source…</div>
@@ -94,7 +99,7 @@ button:disabled{opacity:.55;cursor:wait}
 (() => {
   "use strict";
   const API_URL = "https://draw.ar-lottery01.com/WinGo/WinGo_1M/GetHistoryIssuePage.json?pageNo=1";
-  const ACCESS_KEY = "HACKIIVIP09";
+  const ACCESS_KEY = "HACKIIVIP10";
   const FIXED_SALT = "H-8-2-5-6";
   const $ = id => document.getElementById(id);
   let active = false;
@@ -103,6 +108,7 @@ button:disabled{opacity:.55;cursor:wait}
   let lastAlertAt = 0;
   let audioContext = null;
   let pollBusy = false;
+  let lastWallMinute = "";
 
   function getList(payload) {
     const candidates = [payload?.data?.list, payload?.data?.records, payload?.data?.items,
@@ -120,6 +126,14 @@ button:disabled{opacity:.55;cursor:wait}
     return match ? Number(match[0]) % 10 : null;
   }
   function sizeOf(n) { return n <= 4 ? "SMALL" : "BIG"; }
+  // Number colour rule requested: even digits RED, odd digits GREEN.
+  function colorOf(n) { return n % 2 === 0 ? "red" : "green"; }
+  function paintEstimate(digit) {
+    $("number").className = "number " + colorOf(digit);
+    $("size").className = "size " + colorOf(digit);
+    $("bigCard").classList.toggle("active", digit >= 5);
+    $("smallCard").classList.toggle("active", digit <= 4);
+  }
   function incrementIssue(issue) {
     const s = String(issue ?? "");
     const m = s.match(/^(.*?)(\d+)$/);
@@ -184,6 +198,7 @@ button:disabled{opacity:.55;cursor:wait}
     $("period").textContent = upcoming;
     $("number").textContent = digit;
     $("size").textContent = pending.size;
+    paintEstimate(digit);
     $("source").textContent = "10-result scan · " + valid.length + " valid";
     $("updated").textContent = "Updated " + new Date().toLocaleTimeString();
     $("status").textContent = "Waiting for API result to verify this estimate";
@@ -206,8 +221,9 @@ button:disabled{opacity:.55;cursor:wait}
       if (!valid.length) throw new Error("API response format not recognized");
 
       // First settle an outstanding prediction only when the API publishes that exact period.
-      if (pending && valid[0].issue === pending.issue && lastSettledIssue !== pending.issue) {
-        const actualNumber = valid[0].number;
+      const settledRow = pending ? valid.find(row => row.issue === pending.issue) : null;
+      if (pending && settledRow && lastSettledIssue !== pending.issue) {
+        const actualNumber = settledRow.number;
         const actualSize = sizeOf(actualNumber);
         const resultKind = actualSize === pending.size ? "win" : "loss";
         lastSettledIssue = pending.issue;
@@ -215,6 +231,14 @@ button:disabled{opacity:.55;cursor:wait}
           actualSize + " (" + actualNumber + ")", pending.issue);
         $("status").textContent = "Result verified · " + resultKind.toUpperCase();
         pending = null;
+      } else if (pending && valid[0].issue !== pending.issue && valid.some(row => row.issue === valid[0].issue)) {
+        const newest = valid[0].issue;
+        const pendingSuffix = String(pending.issue).match(/(\\d+)$/)?.[1];
+        const newestSuffix = String(newest).match(/(\\d+)$/)?.[1];
+        if (pendingSuffix && newestSuffix && BigInt(newestSuffix) > BigInt(pendingSuffix)) {
+          $("status").textContent = "Period " + pending.issue + " was skipped by the API feed · syncing latest period";
+          pending = null;
+        }
       }
 
       // Build the next estimate from the newest API data after settlement.
@@ -238,6 +262,11 @@ button:disabled{opacity:.55;cursor:wait}
     $("clock").textContent = now.toLocaleTimeString();
     const remaining = 60 - now.getSeconds();
     $("timer").textContent = "00:" + String(remaining).padStart(2, "0");
+    const minuteKey = now.getFullYear() + "-" + now.getMonth() + "-" + now.getDate() + "-" + now.getHours() + "-" + now.getMinutes();
+    if (active && minuteKey !== lastWallMinute) {
+      lastWallMinute = minuteKey;
+      pollApi(); // refresh exactly when the device wall clock enters a new minute
+    }
   }
   $("start").addEventListener("click", async () => {
     if ($("key").value.trim() !== ACCESS_KEY) {
@@ -252,10 +281,11 @@ button:disabled{opacity:.55;cursor:wait}
     await ensureAudio();
     $("login").style.display = "none";
     $("app").style.display = "block";
+    lastWallMinute = "";
     updateClock();
     pollApi();
     setInterval(updateClock, 250);
-    // Frequent lightweight polling helps detect the newly published round quickly.
+    // Retry the API regularly; the wall-clock minute boundary also triggers a fresh sync.
     setInterval(pollApi, 5000);
   });
   $("key").addEventListener("keydown", e => { if (e.key === "Enter") $("start").click(); });
